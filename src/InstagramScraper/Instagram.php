@@ -2265,4 +2265,86 @@ class Instagram
 
         return $threads;
     }
+
+    /**
+     * @param array $recipients
+     * @return Thread
+     * @throws InstagramException
+     */
+    public function createThread(array $recipients)
+    {
+        $response = Request::post(Endpoints::CREATE_THREAD, array_merge(
+            ['x-ig-app-id' => self::X_IG_APP_ID],
+            $this->generateHeaders($this->userSession)
+        ), ['recipient_users' => $this->buildThreadRecipientsArray($recipients)]);
+
+        if ($response->code !== static::HTTP_OK) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+        }
+
+        $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
+
+        if ($jsonResponse['status'] !== 'ok') {
+            throw new InstagramException('Response status is ' . $jsonResponse['status'] . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+        }
+
+        return Thread::create($jsonResponse);
+    }
+
+    /**
+     * @param array $recipients
+     * @return Thread
+     * @throws InstagramException
+     */
+    public function addUsersToThread(string $threadId, array $recipients)
+    {
+        $response = Request::post(Endpoints::getThreadAddUserUrl($threadId), array_merge(
+            ['x-ig-app-id' => self::X_IG_APP_ID],
+            $this->generateHeaders($this->userSession)
+        ), ['user_ids' => $this->buildThreadRecipientsArray($recipients)]);
+
+        if ($response->code !== static::HTTP_OK) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+        }
+
+        $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
+
+        if ($jsonResponse['status'] !== 'ok') {
+            throw new InstagramException('Response status is ' . $jsonResponse['status'] . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+        }
+
+        return Thread::create($jsonResponse['thread']);
+    }
+
+    /**
+     * @param string $threadId
+     * @param string $title
+     * @return Thread
+     * @throws InstagramException
+     */
+    public function updateThreadTitle($threadId, $title)
+    {
+        $response = Request::post(Endpoints::getThreadUpdateTitleUrl($threadId), array_merge(
+            ['x-ig-app-id' => self::X_IG_APP_ID],
+            $this->generateHeaders($this->userSession)
+        ), ['title' => $title]);
+
+        if ($response->code !== static::HTTP_OK) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+        }
+
+        $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
+
+        if ($jsonResponse['status'] !== 'ok') {
+            throw new InstagramException('Response status is ' . $jsonResponse['status'] . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+        }
+
+        return Thread::create($jsonResponse);
+
+    }
+
+    protected function buildThreadRecipientsArray(array $recipients)
+    {
+        return '["' . implode('","', $recipients) . '"]';
+    }
 }

@@ -38,6 +38,10 @@ class Endpoints
     const HIGHLIGHT_URL = 'https://www.instagram.com/graphql/query/?query_hash=c9100bf9110dd6361671f113dd02e7d6&variables={"user_id":"{userId}","include_chaining":false,"include_reel":true,"include_suggested_users":false,"include_logged_out_extras":false,"include_highlight_reels":true,"include_live_status":false}';
     const HIGHLIGHT_STORIES = 'https://www.instagram.com/graphql/query/?query_hash=45246d3fe16ccc6577e0bd297a5db1ab';
     const THREADS_URL = 'https://www.instagram.com/direct_v2/web/inbox/?persistentBadging=true&folder=&limit={limit}&thread_message_limit={messageLimit}&cursor={cursor}';
+    const CREATE_THREAD = 'https://i.instagram.com/api/v1/direct_v2/create_group_thread/?persistentBadging=true';
+    const ADD_USERS_THREAD = 'https://i.instagram.com/api/v1/direct_v2/threads/{threadId}/add_user/';
+    const UPDATE_THREAD_TITLE = 'https://i.instagram.com/api/v1/direct_v2/threads/{threadId}/update_title/?persistentBadging=true';
+
 
     // Look alike??
     const URL_SIMILAR = 'https://www.instagram.com/graphql/query/?query_id=17845312237175864&id=4663052';
@@ -235,5 +239,15 @@ class Endpoints
         $url = str_replace('{cursor}', $cursor, $url);
 
         return $url;
+    }
+
+    public static function getThreadUpdateTitleUrl($id)
+    {
+        return str_replace('{threadId}', urlencode($id), static::UPDATE_THREAD_TITLE);
+    }
+
+    public static function getThreadAddUserUrl($id)
+    {
+        return str_replace('{threadId}', urlencode($id), static::ADD_USERS_THREAD);
     }
 }
